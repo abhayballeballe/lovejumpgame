@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Love Jump Game</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            background-color: pink;
+            overflow: hidden;
+        }
+        #game {
+            width: 90vw;
+            max-width: 600px;
+            height: 30vh;
+            max-height: 250px;
+            margin: auto;
+            border: 2px solid black;
+            position: relative;
+            overflow: hidden;
+            background-color: #ffcccb;
+            display: none;
+        }
+        #teddy {
+            width: 50px;
+            height: 50px;
+            position: absolute;
+            bottom: 0;
+            left: 50px;
+            background-image: url('bear.jpg');
+            background-size: cover;
+        }
+        .obstacle {
+            width: 30px;
+            height: 40px;
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background-image: url('nazar.jpg');
+            background-size: cover;
+        }
+        #message, #score, #distance, #motivation {
+            font-size: 18px;
+            margin-top: 10px;
+        }
+        #restart, #start {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: red;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        #restart { display: none; }
+    </style>
+</head>
+<body>
+    <h1>Never ending as my love is eternal for u</h1>
+    <p>Tap or press SPACE to jump over Nazar. Collect hearts for points!</p>
+    <button id="start" onclick="startGame()">❤️ Start</button>
+    <div id="game">
+        <div id="teddy"></div>
+    </div>
+    <p id="score">Love Score: 0 ❤️</p>
+    <p id="distance">Distance: 0m ❤️</p>
+    <p id="motivation"></p>
+    <p id="message"></p>
+    <button id="restart" onclick="restartGame()">Restart</button>
+    
+    <script>
+        let teddy = document.getElementById("teddy");
+        let game = document.getElementById("game");
+        let message = document.getElementById("message");
+        let scoreDisplay = document.getElementById("score");
+        let distanceDisplay = document.getElementById("distance");
+        let motivation = document.getElementById("motivation");
+        let restartBtn = document.getElementById("restart");
+        let startBtn = document.getElementById("start");
+        let jumping = false, score = 0, distance = 0;
+        let gameOver = false;
+
+        function startGame() {
+            game.style.display = "block";
+            startBtn.style.display = "none";
+            updateDistance();
+            setTimeout(createObstacle, 3000);
+        }
+
+        function jump() {
+            if (jumping || gameOver) return;
+            jumping = true;
+            let up = setInterval(() => {
+                let pos = parseInt(window.getComputedStyle(teddy).bottom);
+                if (pos >= 150) {
+                    clearInterval(up);
+                    let down = setInterval(() => {
+                        let pos = parseInt(window.getComputedStyle(teddy).bottom);
+                        if (pos <= 0) {
+                            clearInterval(down);
+                            jumping = false;
+                        }
+                        teddy.style.bottom = (pos - 7) + "px";
+                    }, 15);
+                }
+                teddy.style.bottom = (pos + 7) + "px";
+            }, 15);
+        }
+
+        function createObstacle() {
+            if (gameOver) return;
+            let obstacle = document.createElement("div");
+            obstacle.classList.add("obstacle");
+            game.appendChild(obstacle);
+            let move = setInterval(() => {
+                let obstaclePos = parseInt(window.getComputedStyle(obstacle).right);
+                let teddyBottom = parseInt(window.getComputedStyle(teddy).bottom);
+                if (obstaclePos > game.clientWidth) {
+                    clearInterval(move);
+                    game.removeChild(obstacle);
+                } else {
+                    obstacle.style.right = (obstaclePos + 5) + "px";
+                    if (obstaclePos > 450 && obstaclePos < 500 && teddyBottom < 40) {
+                        endGame();
+                    }
+                }
+            }, 25);
+            setTimeout(createObstacle, Math.random() * 3000 + 1500);
+        }
+
+        function updateDistance() {
+            if (gameOver) return;
+            distance++;
+            distanceDisplay.innerText = "Distance: " + distance + "m ❤️";
+            score++;
+            scoreDisplay.innerText = "Love Score: " + score + " ❤️";
+            if (distance % 20 === 0) {
+                let messages = ["You're amazing!", "Keep going, love!", "You're doing great!"];
+                motivation.innerText = messages[Math.floor(Math.random() * messages.length)];
+                setTimeout(() => { motivation.innerText = ""; }, 2000);
+            }
+            setTimeout(updateDistance, 1000);
+        }
+
+        function endGame() {
+            message.innerText = "Aww, I still love you ❤️";
+            restartBtn.style.display = "block";
+            gameOver = true;
+        }
+
+        function restartGame() {
+            location.reload();
+        }
+
+        document.addEventListener("keydown", function (e) { if (e.code === "Space") jump(); });
+        document.addEventListener("touchstart", jump);
+    </script>
+</body>
+</html>
